@@ -6,6 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+
+import com.gk.object.BoardGameObject;
 
 public class DAO {
 
@@ -16,9 +19,8 @@ public class DAO {
 
 	public static void main(String[] args) {
 		try {
-			int id = getIDFromDatabase("Monopoly");
-
-			System.out.println(id);
+			ArrayList<BoardGameObject> games = createBoardGameListByName("Cathedral");
+			System.out.println(games.get(0).getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -105,5 +107,35 @@ public class DAO {
 			return idNumber;
 		}
 		return 0;
+	}
+
+	public static ArrayList<BoardGameObject> createBoardGameListByName(String name) throws Exception {
+		int idNumber;
+		String nameOfGame;
+		String mechanics;
+		ArrayList<String> mechanicsList = null;
+		ArrayList<BoardGameObject> games = new ArrayList<BoardGameObject>();
+		statement = readDatabase();
+		resultSet = statement.executeQuery("Select * from listofgames where name = \"" + name + "\";");
+
+		while (resultSet.next()) {
+			idNumber = resultSet.getInt("ID");
+			nameOfGame = resultSet.getString("name");
+			mechanics = resultSet.getString("mechanics");
+			mechanicsList = separateMechanics(mechanics);
+			BoardGameObject boardGame = new BoardGameObject(idNumber, nameOfGame, mechanicsList);
+			games.add(boardGame);
+		}
+
+		return games;
+	}
+
+	public static ArrayList<String> separateMechanics(String mechanics) {
+		String[] temp = mechanics.split(",");
+		ArrayList<String> mechanicsList = new ArrayList<String>();
+		for (int i = 0; i < temp.length; i++) {
+			mechanicsList.add(temp[i]);
+		}
+		return mechanicsList;
 	}
 }
